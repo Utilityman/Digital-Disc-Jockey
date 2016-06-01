@@ -9,7 +9,6 @@ import net.sourceforge.jaad.mp4.api.MetaData;
 import net.sourceforge.jaad.mp4.api.Movie;
 import net.sourceforge.jaad.mp4.api.Protection;
 import net.sourceforge.jaad.mp4.api.Track;
-import net.sourceforge.jaad.mp4.boxes.Box;
 
 public class Data 
 {

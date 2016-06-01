@@ -1,6 +1,6 @@
 package com.djmachine.util;
 
-public class Organizer 
+public class LibraryLoader 
 {
 
 }
