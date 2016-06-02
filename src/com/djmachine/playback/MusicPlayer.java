@@ -2,11 +2,12 @@ package com.djmachine.playback;
 
 import java.util.Scanner;
 
+import com.djmachine.library.Library;
 import com.djmachine.queue.MusicQueue;
-import com.djmachine.song.Song;
 
 public class MusicPlayer implements Runnable
 {
+	private Library library;
 	private MusicQueue queue;
 	private Scanner scan;
 	
@@ -16,19 +17,13 @@ public class MusicPlayer implements Runnable
 	}
 	private State currentState;
 
-	public MusicPlayer()
+	public MusicPlayer(Library library)
 	{
+		this.library = library;
 		// Pick a random song and then play
 		currentState = State.STOPPED;
 		queue = new MusicQueue();
 		scan = new Scanner(System.in);
-	}
-	
-	public MusicPlayer(Song song)
-	{
-		queue = new MusicQueue();
-		queue.add(song);
-		currentState = State.PLAYING;
 	}
 	
 	public void update()
@@ -53,9 +48,21 @@ public class MusicPlayer implements Runnable
 	@Override
 	public void run() 
 	{
+		System.out.println("here");
+		PlaybackThread threadToPlay = new PlaybackThread(library.getRandomTrack());
+		Thread thread = new Thread(threadToPlay);
+		thread.start();
+		System.out.println("Meanwhile I can do this");
 		while(true)
 		{
-			update();
+			try {
+				Thread.sleep(5000);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			System.out.println("Still going...");
 		}
+
 	}
 }

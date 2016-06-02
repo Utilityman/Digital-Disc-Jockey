@@ -1,15 +1,15 @@
 package com.djmachine.queue;
 
-import com.djmachine.song.Song;
+import com.djmachine.track.Track;
 
 class MusicNode
 {
-	MusicNode(Song item, MusicNode next)
+	MusicNode(Track item, MusicNode next)
 	{
 		this.item = item;
 		this.next = next;
 	}
 	
-	Song item;
+	Track item;
 	MusicNode next;
 }

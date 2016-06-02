@@ -1,6 +1,6 @@
 package com.djmachine.queue;
 
-import com.djmachine.song.Song;
+import com.djmachine.track.Track;
 
 public class MusicQueue 
 {
@@ -11,10 +11,17 @@ public class MusicQueue
 	public MusicQueue()
 	{
 		head = null;
-		previousSongs = new MusicQueue();
+		tail = null;
+		previousSongs = new MusicQueue(-1);
 	}
 	
-	public Song getNext()
+	public MusicQueue(int num)
+	{
+		head = null;
+		tail = null;
+	}
+	
+	public Track getNext()
 	{
 		MusicNode returnSong = head;
 		head = head.next;
@@ -23,7 +30,7 @@ public class MusicQueue
 		return returnSong.item;
 	}
 	
-	public void add(Song song)
+	public void add(Track song)
 	{
 		if(head == null)
 		{
