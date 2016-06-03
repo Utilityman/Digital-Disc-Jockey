@@ -1,5 +1,7 @@
 package com.djmachine.queue;
 
+import java.util.ArrayList;
+
 import com.djmachine.track.Track;
 
 public class MusicQueue 
@@ -23,11 +25,22 @@ public class MusicQueue
 	
 	public Track getNext()
 	{
-		MusicNode returnSong = head;
-		head = head.next;
-		
-		previousSongs.add(head.item);
-		return returnSong.item;
+		if(size() == 1)
+		{
+			MusicNode returnSong = head;
+			head = null;
+			
+			previousSongs.add(returnSong.item);
+			return returnSong.item;
+		}
+		else
+		{
+			MusicNode returnSong = head;
+			head = head.next;
+			
+			previousSongs.add(returnSong.item);
+			return returnSong.item;
+		}
 	}
 	
 	public void add(Track song)
@@ -44,5 +57,38 @@ public class MusicQueue
 			tail.next = node;
 			tail = node;
 		}
+	}
+	
+	public void add(ArrayList<Track> tracks)
+	{
+		for(int i = 0; i < tracks.size(); i++)
+			add(tracks.get(i));
+	}
+
+	public int size() 
+	{
+		if(head == null)
+			return 0;
+		
+		int count = 1;
+		MusicNode tmp = head;
+		while(tmp.next != null)
+		{
+			count++;
+			tmp = tmp.next;
+		}
+		return count;
+	}
+
+	public void clear()
+	{
+		head = null;
+	}
+
+	public boolean hasTracks() 
+	{
+		if(head == null)
+			return false;
+		return true;
 	}
 }

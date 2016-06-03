@@ -28,7 +28,10 @@ public class Playback
 			final Movie movie = cont.getMovie();
 			
 			final List<Track> tracks = movie.getTracks(AudioTrack.AudioCodec.AAC);
-			if(tracks.isEmpty()) throw new Exception("does not contain any AAC track");
+			
+			if(tracks.isEmpty()) 
+				throw new Exception("does not contain any AAC track");
+			
 			final AudioTrack track = (AudioTrack)tracks.get(0);
 			
 			final AudioFormat aufmt = new AudioFormat(track.getSampleRate(), track.getSampleSize(), track.getChannelCount(), true, true);

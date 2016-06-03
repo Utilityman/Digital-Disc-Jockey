@@ -7,62 +7,88 @@ import com.djmachine.queue.MusicQueue;
 
 public class MusicPlayer implements Runnable
 {
+	private boolean running;
+	
 	private Library library;
 	private MusicQueue queue;
 	private Scanner scan;
-	
-	private enum State
-	{
-		PLAYING, PAUSED, STOPPED;
-	}
-	private State currentState;
+	private PlaybackThread threadToPlay;
 
 	public MusicPlayer(Library library)
 	{
 		this.library = library;
 		// Pick a random song and then play
-		currentState = State.STOPPED;
 		queue = new MusicQueue();
 		scan = new Scanner(System.in);
-	}
-	
-	public void update()
-	{
-		switch(currentState)
-		{
-			case PLAYING:
-				
-				break;
-			case PAUSED:
-				
-				break;
-				
-			default:
-				System.out.println("ERR: MUSIC PLAYER HAS NO STATE");
-			case STOPPED:
-				
-				break;	
-		}
+		running = true;
+		threadToPlay = new PlaybackThread();
 	}
 
 	@Override
 	public void run() 
 	{
-		System.out.println("here");
-		PlaybackThread threadToPlay = new PlaybackThread(library.getRandomTrack());
-		Thread thread = new Thread(threadToPlay);
-		thread.start();
-		System.out.println("Meanwhile I can do this");
-		while(true)
+		queue.add(library.randDump(library.size()));
+		
+		while(running)
 		{
-			try {
-				Thread.sleep(5000);
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			System.out.println("Still going...");
+			System.out.print(">>> ");
+			String input = scan.nextLine();
+			parseInput(input);
 		}
-
+	}
+	
+	public void parseInput(String input)
+	{
+		if(input.equals("play"))
+		{
+			if(queue.size() > 0)
+			{
+				threadToPlay = new PlaybackThread(queue);
+				Thread thread = new Thread(threadToPlay);
+				thread.start();
+			}
+			else
+				System.out.println("You must add songs to the queue first!");
+		}
+		if(input.equalsIgnoreCase("hello"))
+			System.out.println("Hello!");
+		if(input.equalsIgnoreCase("which thread"))
+			threadToPlay.acknowledge();
+		if(input.equalsIgnoreCase("pause"))
+			threadToPlay.pause();
+		if(input.equalsIgnoreCase("resume"))
+			threadToPlay.resume();
+		if(input.equalsIgnoreCase("stop"))
+		{		
+			System.out.println("STOPPING");
+			queue.clear();
+			threadToPlay.stop();
+			// HARD stop
+			threadToPlay = new PlaybackThread(queue);
+		}
+		if(input.equalsIgnoreCase("next") || input.equalsIgnoreCase("skip"))
+		{
+			threadToPlay.skip();
+		}
+		if(input.equalsIgnoreCase("quit"))
+			running = false;
+		if(input.length() == 4)
+			if(input.substring(0, 4).equals("find"))
+			{
+				System.out.println("Implementing find");
+			}
+		if(input.length() == 3)
+			if(input.substring(0, 3).equals("add"))
+			{
+				System.out.println("Implementing add");
+			}
+		
+		if(input.equalsIgnoreCase("quit"))
+		{
+			threadToPlay.stop();
+			queue.clear();
+			System.exit(42);
+		}
+			
 	}
 }

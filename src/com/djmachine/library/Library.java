@@ -57,5 +57,22 @@ public class Library
 	{
 		return musicLibrary.get(1);
 	}
+
+	/*
+	 * 
+	 */
+	public ArrayList<Track> randDump(int i) 
+	{
+		ArrayList<Track> dumpList = new ArrayList<Track>();
+		
+		dumpList = musicLibrary;
+		
+		return dumpList;
+	}
+
+	public int size() 
+	{
+		return musicLibrary.size();
+	}
 	
 }
