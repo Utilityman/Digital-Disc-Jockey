@@ -1,5 +1,6 @@
 package com.djmachine.playback;
 
+import java.io.File;
 import java.util.Scanner;
 
 import com.djmachine.library.Library;
@@ -26,9 +27,7 @@ public class MusicPlayer implements Runnable
 
 	@Override
 	public void run() 
-	{
-		queue.add(library.randDump(library.size()));
-		
+	{	
 		while(running)
 		{
 			System.out.print(">>> ");
@@ -39,8 +38,40 @@ public class MusicPlayer implements Runnable
 	
 	public void parseInput(String input)
 	{
+		if(input.equalsIgnoreCase("hello"))
+			System.out.println("Hello!");
 		if(input.equals("play"))
+			play();
+		if(input.equalsIgnoreCase("which thread"))
+			checkIn();
+		if(input.equalsIgnoreCase("pause"))
+			pause();
+		if(input.equalsIgnoreCase("resume"))
+			resume();
+		if(input.equalsIgnoreCase("stop"))
+			stop();
+		if(input.equalsIgnoreCase("next") || input.equalsIgnoreCase("skip"))
+			skip();
+		if(input.length() > 4)
+			if(input.substring(0, 4).equals("find"))
+			{
+				find(input);
+			}
+		if(input.length() > 3)
+			if(input.substring(0, 3).equals("add"))
+			{
+				add(input.substring(4));
+			}
+		
+		if(input.equalsIgnoreCase("quit"))
 		{
+			quit();
+		}		
+	}
+
+	private void play()
+	{
+		//if(threadToPlay.isRunning())		
 			if(queue.size() > 0)
 			{
 				threadToPlay = new PlaybackThread(queue);
@@ -49,46 +80,90 @@ public class MusicPlayer implements Runnable
 			}
 			else
 				System.out.println("You must add songs to the queue first!");
-		}
-		if(input.equalsIgnoreCase("hello"))
-			System.out.println("Hello!");
-		if(input.equalsIgnoreCase("which thread"))
-			threadToPlay.acknowledge();
-		if(input.equalsIgnoreCase("pause"))
-			threadToPlay.pause();
-		if(input.equalsIgnoreCase("resume"))
-			threadToPlay.resume();
-		if(input.equalsIgnoreCase("stop"))
-		{		
-			System.out.println("STOPPING");
-			queue.clear();
-			threadToPlay.stop();
-			// HARD stop
-			threadToPlay = new PlaybackThread(queue);
-		}
-		if(input.equalsIgnoreCase("next") || input.equalsIgnoreCase("skip"))
+		/*else
 		{
-			threadToPlay.skip();
-		}
-		if(input.equalsIgnoreCase("quit"))
-			running = false;
-		if(input.length() == 4)
-			if(input.substring(0, 4).equals("find"))
-			{
-				System.out.println("Implementing find");
-			}
-		if(input.length() == 3)
-			if(input.substring(0, 3).equals("add"))
-			{
-				System.out.println("Implementing add");
-			}
+			System.out.println("resuming");
+			resume();
+		}*/
+	}
+	
+	private void pause()
+	{
+		threadToPlay.pause();
+	}
+	
+	private void resume()
+	{
+		threadToPlay.resume();
+	}
+	
+	private void stop()
+	{		
+		System.out.println("STOPPING");
+		queue.clear();
+		threadToPlay.stop();
+		// HARD stop
+		threadToPlay = new PlaybackThread(queue);
+	}
+	
+	private void skip()
+	{
+		threadToPlay.skip();
+	}
+	
+	private void checkIn()
+	{
+		threadToPlay.acknowledge();
+	}
+	
+	private void find(String input)
+	{
 		
-		if(input.equalsIgnoreCase("quit"))
+	}
+	
+	private void add(String input) 
+	{
+		if(input.equalsIgnoreCase("*"))
 		{
-			threadToPlay.stop();
-			queue.clear();
-			System.exit(42);
+			System.out.println("[INFO] Adding the entire library to the queue");
+			queue.add(library.randDump(library.size()));
 		}
-			
+
+		int firstQuote = input.indexOf("\"");
+		int secondQuote = getNextQuotePos(firstQuote, input);
+		firstQuote++;
+		
+		String resourceDirectory = System.getProperty("user.dir") + "/res/";
+		System.out.println(firstQuote + " " + secondQuote);
+		System.out.println(input.substring(firstQuote, secondQuote));
+		File file = new File(resourceDirectory + input.substring(firstQuote, secondQuote));
+		if(file.isDirectory())
+			System.out.println("Progress!");
+		
+		System.out.println("Queue: " + queue);
+
+	}
+	
+	private int getNextQuotePos(int firstQuote, String input)
+	{
+		for(int i = firstQuote + 1; i < input.length() - firstQuote; i++)
+		{
+			if(input.charAt(i) == '"')
+			{
+				System.out.println("found it");
+				return i;
+			}
+		}	
+		
+		return -1;
+	}
+	
+	private void quit()
+	{
+		running = false;
+
+		threadToPlay.stop();
+		queue.clear();
+		System.exit(42);
 	}
 }

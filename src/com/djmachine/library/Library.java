@@ -1,6 +1,8 @@
 package com.djmachine.library;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Random;
 
 import com.djmachine.track.Track;
 
@@ -66,6 +68,9 @@ public class Library
 		ArrayList<Track> dumpList = new ArrayList<Track>();
 		
 		dumpList = musicLibrary;
+		
+		long seed = System.nanoTime();
+		Collections.shuffle(dumpList, new Random(seed));
 		
 		return dumpList;
 	}

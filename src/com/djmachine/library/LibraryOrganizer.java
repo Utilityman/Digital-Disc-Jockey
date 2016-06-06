@@ -19,6 +19,7 @@ import com.djmachine.util.TrackData;
  *  TODO: Dump extra files into ~fileDump/
  *  TODO: Intense error handling. 
  *  TODO: Unknown artist (--> move to 'res/UnknownArtists') or album (--> move to '~artistName/')
+ *  TODO: Renaming files that are brought in with itunes "#-## <trackname>.m4a" get rid of #-##
  *  
  * @author jmackin
  *

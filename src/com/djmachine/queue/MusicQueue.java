@@ -91,4 +91,20 @@ public class MusicQueue
 			return false;
 		return true;
 	}
+	
+	public String toString()
+	{
+		if(head == null)
+			return "";
+		StringBuilder builder = new StringBuilder();
+		
+		MusicNode tmp = head;
+		while(tmp.next != null)
+		{
+			builder.append(tmp.item.data + "\t");
+			tmp = tmp.next;
+		}
+		builder.append(tmp.item.data);
+		return builder.toString();
+	}
 }

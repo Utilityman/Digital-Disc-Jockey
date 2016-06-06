@@ -61,56 +61,64 @@ public class PlaybackThread implements Runnable
 			finished = false;
 			currentTrack = tracks.getNext();
 			
-			byte[] b;
-			try 
+			if(currentTrack.type.equals("m4a"))
 			{
-				AudioTrack audioTrack = getTrack();
-				if(audioTrack == null)
-				{
-					System.out.println("[SEVERE] Something went wrong playing " + currentTrack);
-					finished = true;
-					running = false;
-				}
-				else
-				{
-					AudioFormat aufmt = new AudioFormat(audioTrack.getSampleRate(), audioTrack.getSampleSize(), audioTrack.getChannelCount(), true, true);
-	
-					line = AudioSystem.getSourceDataLine(aufmt);
-					line.open();
-					System.out.print(">>> ");
-					line.start();
-	
-					
-					final Decoder dec = new Decoder(audioTrack.getDecoderSpecificInfo());
-					
-					Frame frame;
-					final SampleBuffer buf = new SampleBuffer();
-					
-					while(audioTrack.hasMoreFrames() && !finished)
-					{
-						while(!running);
-						frame = audioTrack.readNextFrame();
-						try
-						{
-							dec.decodeFrame(frame.getData(), buf);
-							b = buf.getData();
-							line.write(b, 0, b.length);
-						}
-						catch(AACException e)
-						{
-							e.printStackTrace();
-						}
-					}
-				}				
-			} catch (Exception e)
-			{
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				handleM4A();
 			}
 		}
 	}
 	
-	private AudioTrack getTrack() 
+	private void handleM4A()
+	{
+		byte[] b;
+		try 
+		{
+			AudioTrack audioTrack = getM4ATrack();
+			if(audioTrack == null)
+			{
+				System.out.println("[SEVERE] Something went wrong playing " + currentTrack);
+				finished = true;
+				running = false;
+			}
+			else
+			{
+				AudioFormat aufmt = new AudioFormat(audioTrack.getSampleRate(), audioTrack.getSampleSize(), audioTrack.getChannelCount(), true, true);
+
+				line = AudioSystem.getSourceDataLine(aufmt);
+				line.open();
+				System.out.print(">>> ");
+				line.start();
+
+				
+				final Decoder dec = new Decoder(audioTrack.getDecoderSpecificInfo());
+				
+				Frame frame;
+				final SampleBuffer buf = new SampleBuffer();
+				
+				while(audioTrack.hasMoreFrames() && !finished)
+				{
+					while(!running);
+					frame = audioTrack.readNextFrame();
+					try
+					{
+						dec.decodeFrame(frame.getData(), buf);
+						b = buf.getData();
+						line.write(b, 0, b.length);
+					}
+					catch(AACException e)
+					{
+						e.printStackTrace();
+					}
+				}
+			}				
+		} catch (Exception e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	private AudioTrack getM4ATrack() 
 	{
 		MP4Container cont;
 		try 
