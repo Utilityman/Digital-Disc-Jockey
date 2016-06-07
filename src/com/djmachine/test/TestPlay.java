@@ -10,7 +10,7 @@ import net.sourceforge.jaad.aac.Decoder;
 import net.sourceforge.jaad.aac.SampleBuffer;
 import net.sourceforge.jaad.adts.ADTSDemultiplexer;
 
-import com.djmachine.playback.Playback;
+import com.djmachine.playback.OriginalPlayback;
 
 public class TestPlay 
 {
@@ -19,7 +19,7 @@ public class TestPlay
 		String in = "res/Intro.m4a";
 		try
 		{
-			Playback.decodeM4A(in);
+			OriginalPlayback.decodeM4A(in);
 		}
 		catch(Exception e)
 		{

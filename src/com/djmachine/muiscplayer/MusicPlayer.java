@@ -1,10 +1,11 @@
-package com.djmachine.playback;
+package com.djmachine.muiscplayer;
 
-import java.io.File;
 import java.util.Scanner;
 
 import com.djmachine.library.Library;
+import com.djmachine.playback.PlaybackThread;
 import com.djmachine.queue.MusicQueue;
+import com.djmachine.util.CommandLineUtil;
 
 public class MusicPlayer implements Runnable
 {
@@ -53,15 +54,18 @@ public class MusicPlayer implements Runnable
 		if(input.equalsIgnoreCase("next") || input.equalsIgnoreCase("skip"))
 			skip();
 		if(input.length() > 4)
-			if(input.substring(0, 4).equals("find"))
+			if(input.substring(0, 4).equals("find") || input.equalsIgnoreCase("ls"))
 			{
-				find(input);
+				list(input.substring(5));
 			}
 		if(input.length() > 3)
 			if(input.substring(0, 3).equals("add"))
 			{
 				add(input.substring(4));
 			}
+		
+		if(input.equalsIgnoreCase("show queue"))
+			System.out.println("Queue: " + queue);
 		
 		if(input.equalsIgnoreCase("quit"))
 		{
@@ -71,15 +75,24 @@ public class MusicPlayer implements Runnable
 
 	private void play()
 	{
-		//if(threadToPlay.isRunning())		
-			if(queue.size() > 0)
+		if(threadToPlay != null)
+		{
+			if(threadToPlay.isPaused())
 			{
-				threadToPlay = new PlaybackThread(queue);
-				Thread thread = new Thread(threadToPlay);
-				thread.start();
+				resume();
+				return;
 			}
-			else
-				System.out.println("You must add songs to the queue first!");
+		}
+		
+		if(!threadToPlay.isRunning())
+			if(queue.size() > 0)
+				{
+					threadToPlay = new PlaybackThread(queue);
+					Thread thread = new Thread(threadToPlay);
+					thread.start();
+				}
+				else
+					System.out.println("You must add songs to the queue first!");
 		/*else
 		{
 			System.out.println("resuming");
@@ -103,7 +116,7 @@ public class MusicPlayer implements Runnable
 		queue.clear();
 		threadToPlay.stop();
 		// HARD stop
-		threadToPlay = new PlaybackThread(queue);
+		threadToPlay = new PlaybackThread();
 	}
 	
 	private void skip()
@@ -116,47 +129,19 @@ public class MusicPlayer implements Runnable
 		threadToPlay.acknowledge();
 	}
 	
-	private void find(String input)
+	private void list(String input)
 	{
 		
 	}
 	
 	private void add(String input) 
 	{
-		if(input.equalsIgnoreCase("*"))
-		{
-			System.out.println("[INFO] Adding the entire library to the queue");
-			queue.add(library.randDump(library.size()));
-		}
-
-		int firstQuote = input.indexOf("\"");
-		int secondQuote = getNextQuotePos(firstQuote, input);
-		firstQuote++;
-		
-		String resourceDirectory = System.getProperty("user.dir") + "/res/";
-		System.out.println(firstQuote + " " + secondQuote);
-		System.out.println(input.substring(firstQuote, secondQuote));
-		File file = new File(resourceDirectory + input.substring(firstQuote, secondQuote));
-		if(file.isDirectory())
-			System.out.println("Progress!");
-		
-		System.out.println("Queue: " + queue);
-
+		boolean success = CommandLineUtil.add(input, queue, library);
+		if(!success)
+			addUsage();
 	}
 	
-	private int getNextQuotePos(int firstQuote, String input)
-	{
-		for(int i = firstQuote + 1; i < input.length() - firstQuote; i++)
-		{
-			if(input.charAt(i) == '"')
-			{
-				System.out.println("found it");
-				return i;
-			}
-		}	
-		
-		return -1;
-	}
+
 	
 	private void quit()
 	{
@@ -165,5 +150,10 @@ public class MusicPlayer implements Runnable
 		threadToPlay.stop();
 		queue.clear();
 		System.exit(42);
+	}
+	
+	private void addUsage()
+	{
+		System.out.println("ADD USAGE: add \"<artist>\" \"<album\" \"<track\"");
 	}
 }

@@ -79,5 +79,17 @@ public class Library
 	{
 		return musicLibrary.size();
 	}
+
+	public Track getTrack(String input) 
+	{
+		for(int i = 0; i < musicLibrary.size(); i++)
+		{
+			if(musicLibrary.get(i).location.equals(input))
+			{
+				return musicLibrary.get(i);
+			}
+		}
+		return null;
+	}
 	
 }

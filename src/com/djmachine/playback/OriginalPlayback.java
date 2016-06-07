@@ -16,7 +16,7 @@ import net.sourceforge.jaad.mp4.api.Frame;
 import net.sourceforge.jaad.mp4.api.Movie;
 import net.sourceforge.jaad.mp4.api.Track;
 
-public class Playback 
+public class OriginalPlayback 
 {
 	public static void decodeM4A(String in) throws Exception
 	{

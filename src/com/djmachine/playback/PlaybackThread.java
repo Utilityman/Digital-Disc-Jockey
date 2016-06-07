@@ -21,26 +21,29 @@ import com.djmachine.track.Track;
 public class PlaybackThread implements Runnable
 {
 	private MusicQueue tracks;
+	
 	private Track currentTrack;
+	private SourceDataLine line;
+
 	private boolean finished;
 	private volatile boolean running;
-	private SourceDataLine line;
+	private boolean paused;
 
 	
 	public PlaybackThread()
 	{
 		tracks = new MusicQueue();
-		finished = true;
+		finished = false;
 		running = false;
 		line = null;
+		paused = false;
 	}
 	
 	public PlaybackThread(Track track)
 	{
-		tracks = new MusicQueue();
+		super();
 		tracks.add(track);
 		finished = false;
-		running = true;
 		line = null;
 	}
 	
@@ -48,14 +51,15 @@ public class PlaybackThread implements Runnable
 	{
 		this.tracks = queue;
 		finished = false;
-		running = true;
+		running = false;
 		line = null;
-		System.out.println(tracks.size());
+		paused = false;
 	}
 
 	@Override
 	public void run() 
 	{
+		running = true;
 		while(tracks.hasTracks())
 		{
 			finished = false;
@@ -66,6 +70,7 @@ public class PlaybackThread implements Runnable
 				handleM4A();
 			}
 		}
+		running = false;
 	}
 	
 	private void handleM4A()
@@ -155,11 +160,18 @@ public class PlaybackThread implements Runnable
 	public void pause()
 	{
 		running = false;
+		paused = true;
 	}
 	
 	public void resume()
 	{
 		running = true;
+		paused = false;
+	}
+	
+	public boolean isPaused()
+	{
+		return paused;
 	}
 	
 	public void stop()
