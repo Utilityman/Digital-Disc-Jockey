@@ -65,6 +65,10 @@ lib/
 res/
 
 
+##
+node_modules/
+
 ## OS Specific
 .DS_Store
 
+/target/
