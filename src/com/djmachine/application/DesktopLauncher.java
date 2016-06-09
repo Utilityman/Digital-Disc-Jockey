@@ -13,7 +13,7 @@ public class DesktopLauncher
 		LibraryOrganizer.organizeLibrary();
 		Library library = LibraryLoader.LoadLibrary();
 		
-		new MusicPlayer(library).run();
+		new MusicPlayer(library);
 		
 	}
 

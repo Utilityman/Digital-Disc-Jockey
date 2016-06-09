@@ -1,17 +1,16 @@
 package com.djmachine.application;
 
 
-public class ClientLauncher 
-{
-	//private Socket socket;
-	
-	public static void main(String[] args)
-	{
-		connectSocket();
-	}
-	
-	private static void connectSocket()
-	{
+import com.djmachine.client.Client;
 
+
+public class ClientLauncher 
+{	
+	public static void main(String[] args)
+	{		
+		int port = 8989;
+		
+		new Client(port);		
+		//new NodeClient(port);
 	}
 }

@@ -7,7 +7,7 @@ import com.djmachine.playback.PlaybackThread;
 import com.djmachine.queue.MusicQueue;
 import com.djmachine.util.CommandLineUtil;
 
-public class MusicPlayer implements Runnable
+public class MusicPlayer
 {
 	private boolean running;
 	
@@ -24,9 +24,10 @@ public class MusicPlayer implements Runnable
 		scan = new Scanner(System.in);
 		running = true;
 		threadToPlay = new PlaybackThread();
+		
+		run();
 	}
 
-	@Override
 	public void run() 
 	{	
 		while(running)
