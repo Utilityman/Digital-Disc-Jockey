@@ -12,7 +12,7 @@ import net.sourceforge.jaad.adts.ADTSDemultiplexer;
 
 import com.djmachine.playback.OriginalPlayback;
 
-public class TestPlay 
+public class PlaybackDemoM4A 
 {
 	public static void main(String[] args)
 	{

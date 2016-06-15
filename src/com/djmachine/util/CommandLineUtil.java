@@ -1,10 +1,8 @@
 package com.djmachine.util;
 
-import java.io.File;
-import java.io.FilenameFilter;
-
 import com.djmachine.library.Library;
 import com.djmachine.queue.MusicQueue;
+import com.djmachine.track.Track;
 
 /**
  * A utility class to hold nasty code that I don't want in the actual music player.
@@ -14,6 +12,16 @@ import com.djmachine.queue.MusicQueue;
  */
 public class CommandLineUtil 
 {
+	
+	/**
+	 * This function looks through the library and adds any found songs to the queue.
+	 * When the GUI is implemented this might still be useful to call when adding songs to the queue.-
+	 * 
+	 * @param input - the parameters for the add function "<artist> <album> <track>"
+	 * @param queue - the object to add songs to if any are found
+	 * @param library - library to query for params and the songs to eventually add
+	 * @return
+	 */
 	public static boolean add(String input, MusicQueue queue, Library library)
 	{
 		// Entire Library
@@ -24,56 +32,31 @@ public class CommandLineUtil
 			System.out.println("Queue: " + queue);
 			return true;
 		}
-
+		// Does the input even have quotes
 		if(!input.contains("\""))
 			return false;
 		
 		int firstQuote = input.indexOf("\"");
 		int secondQuote = getNextQuotePos(firstQuote, input);
 		if(secondQuote <= 0)
-			return false;
-		firstQuote++;
-		
-		String resourceDirectory = System.getProperty("user.dir") + "/res/";
-		System.out.print(input.substring(firstQuote, secondQuote));
-		File file = new File(resourceDirectory + input.substring(firstQuote, secondQuote));
-		if(file.isDirectory())
 		{
-			resourceDirectory = file.getPath();
+			System.out.print("\n");
+			return false;
+		}
+		firstQuote++;
+		System.out.print(input.substring(firstQuote, secondQuote));
+
+		if(library.hasArtist(input.substring(firstQuote, secondQuote)))
+		{
 			try
 			{
-				input = input.substring(secondQuote + 2);
-			}
-			catch(StringIndexOutOfBoundsException ex)
+				input = input.substring(secondQuote + 2);	// Cut out artist parameter...
+			}	
+			catch(StringIndexOutOfBoundsException ex)		// Unless it's the last param
 			{
-				// Adding all songs from an artist 
 				System.out.print(" --> *\n");
-				String[] directories = file.list(new FilenameFilter()
-				{
-					  @Override
-					  public boolean accept(File current, String name) 
-					  {
-					    return new File(current, name).isDirectory();
-					  }
-				});	
-				
-				for(int i = 0; i < directories.length; i++)
-				{
-					file = new File(resourceDirectory + "/" + directories[i]);
-					String[] files = file.list(new FilenameFilter()
-					{
-						  @Override
-						  public boolean accept(File current, String name) 
-						  {
-						    return new File(current, name).isFile();
-						  }
-					});				
-					
-					for(int j = 0; j < files.length; j++)
-					{
-						queue.add(library.getTrack(resourceDirectory + "/" + directories[i] + "/" +files[j]));
-					}					
-				}
+
+				queue.add(library.getArtistTracks(input.substring(firstQuote, secondQuote)));
 				
 				System.out.println("Queue: " + queue);
 				return true;
@@ -82,34 +65,24 @@ public class CommandLineUtil
 			firstQuote = input.indexOf("\"");
 			secondQuote = getNextQuotePos(firstQuote, input);
 			if(secondQuote <= 0)
+			{
+				System.out.print("\n");
 				return false;
+			}
 			firstQuote++;
 			System.out.print(" --> " + input.substring(firstQuote, secondQuote));
-			file = new File(resourceDirectory + "/" +input.substring(firstQuote, secondQuote));
 			
-			if(file.isDirectory())
+			if(library.hasAlbum(input.substring(firstQuote, secondQuote)))
 			{
-				resourceDirectory = file.getPath();
 				try
 				{
-					input = input.substring(secondQuote + 2);
+					input = input.substring(secondQuote + 2);	// Cut out album parameter
 				}
-				catch(StringIndexOutOfBoundsException ex)
+				catch(StringIndexOutOfBoundsException ex)		// Unless it's the last param
 				{
-					//Add all of an album to the queue
 					System.out.print(" --> *\n");
-					String[] files = file.list(new FilenameFilter()
-					{
-						  @Override
-						  public boolean accept(File current, String name) 
-						  {
-						    return new File(current, name).isFile();
-						  }
-					});					
-					for(int i = 0; i < files.length; i++)
-					{
-						queue.add(library.getTrack(resourceDirectory + "/" +files[i]));
-					}
+
+					queue.add(library.getAlbumTracks(input.substring(firstQuote, secondQuote)));
 					
 					System.out.println("Queue: " + queue);
 					return true;
@@ -118,18 +91,26 @@ public class CommandLineUtil
 				firstQuote = input.indexOf("\"");
 				secondQuote = getNextQuotePos(firstQuote, input);
 				if(secondQuote <= 0)
-					return false;
-				firstQuote++;
-				System.out.print(" --> " + input.substring(firstQuote, secondQuote) + "\n");
-				file = new File(resourceDirectory + "/" +input.substring(firstQuote, secondQuote));
-				if(file.isFile())
 				{
-					queue.add(library.getTrack(resourceDirectory + "/" +input.substring(firstQuote, secondQuote)));
-					System.out.println("Queue: " + queue);
+					System.out.print("\n");
+					return false;
+				}
+				firstQuote++;	
+				Track track = library.getTrack(input.substring(firstQuote, secondQuote));
+				if(track != null)
+				{
+					System.out.println(" --> " + input.substring(firstQuote, secondQuote));
+					queue.add(track);
 					return true;
 				}
+				else
+					System.out.println("--> error\nCould not find track...");
 			}
+			else
+				System.out.println("--> error \nCould not find album...");
 		}
+		else
+			System.out.println("--> error \nCould not find artist...");
 		
 		return false;
 	}
@@ -145,5 +126,101 @@ public class CommandLineUtil
 		}	
 		
 		return -1;
+	}
+
+	/**
+	 * This method will mostly be outclassed by the eventual gui. Why show on the command line what you can see!
+	 * @param input
+	 * @param library
+	 * @return
+	 */
+	public static boolean find(String input, Library library) 
+	{
+		// Entire Library
+		if(input.equalsIgnoreCase("*"))
+		{
+			System.out.println("[INFO] Adding the entire library to the queue");
+			System.out.println(library);
+			return true;
+		}
+		// Does the input even have quotes
+		if(!input.contains("\""))
+			return false;
+		
+		int firstQuote = input.indexOf("\"");
+		int secondQuote = getNextQuotePos(firstQuote, input);
+		if(secondQuote <= 0)
+		{
+			System.out.print("\n");
+			return false;
+		}
+		firstQuote++;
+		System.out.print(input.substring(firstQuote, secondQuote));
+
+		if(library.hasArtist(input.substring(firstQuote, secondQuote)))
+		{
+			try
+			{
+				input = input.substring(secondQuote + 2);	// Cut out artist parameter...
+			}	
+			catch(StringIndexOutOfBoundsException ex)		// Unless it's the last param
+			{
+				System.out.print(" --> *\n");
+
+				System.out.println(library.getArtistTracks(input.substring(firstQuote, secondQuote)));
+				
+				return true;
+			}
+			
+			firstQuote = input.indexOf("\"");
+			secondQuote = getNextQuotePos(firstQuote, input);
+			if(secondQuote <= 0)
+			{
+				System.out.print("\n");
+				return false;
+			}
+			firstQuote++;
+			System.out.print(" --> " + input.substring(firstQuote, secondQuote));
+			
+			if(library.hasAlbum(input.substring(firstQuote, secondQuote)))
+			{
+				try
+				{
+					input = input.substring(secondQuote + 2);	// Cut out album parameter
+				}
+				catch(StringIndexOutOfBoundsException ex)		// Unless it's the last param
+				{
+					System.out.print(" --> *\n");
+
+					System.out.println(library.getAlbumTracks(input.substring(firstQuote, secondQuote)));
+					
+					return true;
+				}
+				
+				firstQuote = input.indexOf("\"");
+				secondQuote = getNextQuotePos(firstQuote, input);
+				if(secondQuote <= 0)
+				{
+					System.out.print("\n");
+					return false;
+				}
+				firstQuote++;	
+				Track track = library.getTrack(input.substring(firstQuote, secondQuote));
+				if(track != null)
+				{
+					System.out.println(" --> " + input.substring(firstQuote, secondQuote));
+					System.out.println(track);
+					return true;
+				}
+				else
+					System.out.println("--> error\nCould not find track...");
+			}
+			else
+				System.out.println("--> error \nCould not find album...");
+		}
+		else
+			System.out.println("--> error \nCould not find artist...");
+		
+		return false;
 	}
 }

@@ -5,18 +5,25 @@ import java.util.Scanner;
 import com.djmachine.library.Library;
 import com.djmachine.playback.PlaybackThread;
 import com.djmachine.queue.MusicQueue;
+import com.djmachine.server.Server;
 import com.djmachine.util.CommandLineUtil;
 
-public class MusicPlayer
+public class MusicPlayer implements Runnable
 {
+	public enum Mode { CONSOLE, SERVER, CLIENT};
+	
 	private boolean running;
+	private Server server;
 	
 	private Library library;
 	private MusicQueue queue;
 	private Scanner scan;
 	private PlaybackThread threadToPlay;
+	private Mode mode;
 
-	public MusicPlayer(Library library)
+	private String response;
+	
+	public MusicPlayer(Library library, Mode mode)
 	{
 		this.library = library;
 		// Pick a random song and then play
@@ -24,24 +31,57 @@ public class MusicPlayer
 		scan = new Scanner(System.in);
 		running = true;
 		threadToPlay = new PlaybackThread();
-		
-		run();
+		this.mode = mode;
+
+	}
+
+	public MusicPlayer(Library library, Mode mode, Server server) 
+	{
+		this.library = library;
+		// Pick a random song and then play
+		queue = new MusicQueue();
+		scan = new Scanner(System.in);
+		running = true;
+		threadToPlay = new PlaybackThread();
+		this.mode = mode;
+		this.server = server;
 	}
 
 	public void run() 
 	{	
-		while(running)
+		switch(mode)
 		{
-			System.out.print(">>> ");
-			String input = scan.nextLine();
-			parseInput(input);
+			case CONSOLE:
+				while(running)
+				{
+					System.out.print(">>> ");
+					String input = scan.nextLine();
+					parseInput(input);
+				}
+				break;
+			case SERVER:
+				String input = null;
+				while(running)
+				{
+					if(input != null)
+					{
+						System.out.println("[INFO] Server music player parsing " + input);
+						String response = parseInput(input);
+						if(!response.equals(input))
+							sendAction(response);
+					}
+				}
+				break;
+			default:
+				System.out.println("[MEGA-SEVERE] How did you not set a mode?!");
+				break;
 		}
+
 	}
 	
-	public void parseInput(String input)
+	public String parseInput(String input)
 	{
-		if(input.equalsIgnoreCase("hello"))
-			System.out.println("Hello!");
+		this.response = input;
 		if(input.equals("play"))
 			play();
 		if(input.equalsIgnoreCase("which thread"))
@@ -55,10 +95,12 @@ public class MusicPlayer
 		if(input.equalsIgnoreCase("next") || input.equalsIgnoreCase("skip"))
 			skip();
 		if(input.length() > 4)
-			if(input.substring(0, 4).equals("find") || input.equalsIgnoreCase("ls"))
+			if(input.substring(0, 4).equals("find"))
 			{
 				list(input.substring(5));
 			}
+		if(input.equalsIgnoreCase("ls"))
+			list("*");
 		if(input.length() > 3)
 			if(input.substring(0, 3).equals("add"))
 			{
@@ -71,7 +113,8 @@ public class MusicPlayer
 		if(input.equalsIgnoreCase("quit"))
 		{
 			quit();
-		}		
+		}
+		return response;		
 	}
 
 	private void play()
@@ -81,6 +124,7 @@ public class MusicPlayer
 			if(threadToPlay.isPaused())
 			{
 				resume();
+				response = "resumed";
 				return;
 			}
 		}
@@ -91,9 +135,15 @@ public class MusicPlayer
 					threadToPlay = new PlaybackThread(queue);
 					Thread thread = new Thread(threadToPlay);
 					thread.start();
+					response = "started";
+					sendAction("update playing" +"\"" + queue.peek() + "\"");
 				}
 				else
-					System.out.println("You must add songs to the queue first!");
+				{
+					if(mode == Mode.CONSOLE)
+						System.out.println("You must add songs to the queue first!");
+					response = "You must add songs to the queue first!";			
+				}
 		/*else
 		{
 			System.out.println("resuming");
@@ -104,16 +154,20 @@ public class MusicPlayer
 	private void pause()
 	{
 		threadToPlay.pause();
+		response = "paused";
 	}
 	
 	private void resume()
 	{
 		threadToPlay.resume();
+		response = "resumed";
 	}
 	
 	private void stop()
 	{		
-		System.out.println("STOPPING");
+		if(mode == Mode.CONSOLE)
+			System.out.println("STOPPING");
+		response = "stopped";
 		queue.clear();
 		threadToPlay.stop();
 		// HARD stop
@@ -123,26 +177,31 @@ public class MusicPlayer
 	private void skip()
 	{
 		threadToPlay.skip();
+		response = "skipping song";
 	}
 	
 	private void checkIn()
 	{
-		threadToPlay.acknowledge();
+		response = threadToPlay.acknowledge();
 	}
 	
 	private void list(String input)
 	{
-		
+		boolean success = CommandLineUtil.find(input, library);
+		//TODO: Better responses
+		response = "listing songs";
+		if(!success)
+			addUsage();
 	}
 	
 	private void add(String input) 
 	{
 		boolean success = CommandLineUtil.add(input, queue, library);
+		// TODO: Better response
+		response = "adding songs";
 		if(!success)
 			addUsage();
 	}
-	
-
 	
 	private void quit()
 	{
@@ -155,6 +214,12 @@ public class MusicPlayer
 	
 	private void addUsage()
 	{
-		System.out.println("ADD USAGE: add \"<artist>\" \"<album\" \"<track\"");
+		System.out.println("ADD USAGE: add \"<artist>\" \"<album>\" \"<track>\"");
+		response = "ADD USAGE: add \"<artist>\" \"<album\" \"<track>\"";
+	}
+	
+	private void sendAction(String message)
+	{
+		server.addAction(message);
 	}
 }

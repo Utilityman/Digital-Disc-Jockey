@@ -63,7 +63,8 @@ build/
 ## Project
 lib/
 res/
-
+*.mp3
+*.m4a
 
 ##
 node_modules/

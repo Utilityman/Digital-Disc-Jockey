@@ -72,7 +72,6 @@ public class Client
 			System.out.println("[SUCCESS] Connection closed!");
 		} 
 		catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}

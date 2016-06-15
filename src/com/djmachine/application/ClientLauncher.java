@@ -10,7 +10,7 @@ public class ClientLauncher
 	{		
 		int port = 8989;
 		
-		new Client(port);		
-		//new NodeClient(port);
+		//new Client(port);		
+		new Client(port);
 	}
 }

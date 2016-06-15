@@ -4,6 +4,7 @@ import com.djmachine.library.Library;
 import com.djmachine.library.LibraryLoader;
 import com.djmachine.library.LibraryOrganizer;
 import com.djmachine.muiscplayer.MusicPlayer;
+import com.djmachine.muiscplayer.MusicPlayer.Mode;
 
 public class DesktopLauncher 
 {
@@ -13,7 +14,7 @@ public class DesktopLauncher
 		LibraryOrganizer.organizeLibrary();
 		Library library = LibraryLoader.LoadLibrary();
 		
-		new MusicPlayer(library);
+		new MusicPlayer(library, Mode.CONSOLE).run();;
 		
 	}
 

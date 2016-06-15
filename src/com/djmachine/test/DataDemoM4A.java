@@ -1,4 +1,4 @@
-package com.djmachine.util;
+package com.djmachine.test;
 
 import java.io.RandomAccessFile;
 import java.util.List;
@@ -10,10 +10,10 @@ import net.sourceforge.jaad.mp4.api.Movie;
 import net.sourceforge.jaad.mp4.api.Protection;
 import net.sourceforge.jaad.mp4.api.Track;
 
-public class Data 
+public class DataDemoM4A 
 {
 	public static void main(String[] args) { 
-		long startTime = System.currentTimeMillis();
+		//long startTime = System.currentTimeMillis();
 
 		try { 
 			final String file; 
@@ -58,22 +58,6 @@ public class Data
 		} catch (Exception e) { 
 			e.printStackTrace(); 
 			System.err.println("error while reading file: " + e.toString()); 
-		} 
-		
-		System.out.println("total time " + (System.currentTimeMillis() - startTime));
+		} 		
 	} 
-	
-	
-	/*private static void printBox(Box box, int level) { 
-		final StringBuilder sb = new StringBuilder(); 
-		for (int i = 0; i < level; i++) { 
-			sb.append("  "); 
-		} 
-		sb.append(box.toString()); 
-		System.out.println(sb.toString()); 
-
-		for (Box child : box.getChildren()) { 
-			printBox(child, level + 1); 
-		} 
-	} */
 }

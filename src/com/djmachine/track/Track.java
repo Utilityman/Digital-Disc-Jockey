@@ -1,11 +1,9 @@
 package com.djmachine.track;
 
-import com.djmachine.util.TrackData;
-
 public class Track 
 {
 	public String location;
-	public TrackData data;
+	private TrackData data;
 	public String type;
 	
 	public Track(String location)
@@ -40,5 +38,25 @@ public class Track
 	public static Track getEmptyTrack() 
 	{
 		return new Track();
+	}
+
+	public String getTitle()
+	{
+		return data.getTitle();
+	}
+	
+	public String getAlbum() 
+	{
+		return data.getAlbum();
+	}
+
+	public String getArtist() 
+	{
+		return data.getArtist();
+	}
+
+	public String getGenre() 
+	{
+		return data.getGenre();
 	}
 }

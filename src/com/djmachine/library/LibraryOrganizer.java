@@ -7,7 +7,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 
-import com.djmachine.util.TrackData;
+import com.djmachine.track.TrackData;
 
 /** 
  * Organizes a library by tearing down the shelves and reorganizing everything. 

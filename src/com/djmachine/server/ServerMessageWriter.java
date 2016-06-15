@@ -42,8 +42,7 @@ public class ServerMessageWriter implements Runnable
 			{
 				Thread.sleep(1000);
 			} 
-			catch (InterruptedException e) {
-				// TODO Auto-generated catch block
+			catch (InterruptedException e) {				
 				e.printStackTrace();
 			}
 		}

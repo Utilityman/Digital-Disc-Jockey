@@ -101,10 +101,15 @@ public class MusicQueue
 		MusicNode tmp = head;
 		while(tmp.next != null)
 		{
-			builder.append(tmp.item.data + "\t");
+			builder.append(tmp.item + "\t");
 			tmp = tmp.next;
 		}
-		builder.append(tmp.item.data);
+		builder.append(tmp.item);
 		return builder.toString();
+	}
+
+	public String peek() 
+	{
+		return head.item.toString();
 	}
 }

@@ -40,7 +40,6 @@ public class TestServer
 		try {
 			serverSock.close();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 

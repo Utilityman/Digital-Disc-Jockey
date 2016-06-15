@@ -23,12 +23,12 @@ public class Library
 	
 	public boolean addTrack(Track track)
 	{
-		if(!albums.contains(track.data.getAlbum()))
-			addAlbum(track.data.getAlbum());
-		if(!artists.contains(track.data.getArtist()))
-			addArtist(track.data.getArtist());
-		if(!genres.contains(track.data.getGenre()))
-			addGenre(track.data.getGenre());
+		if(!albums.contains(track.getAlbum()))
+			addAlbum(track.getAlbum());
+		if(!artists.contains(track.getArtist()))
+			addArtist(track.getArtist());
+		if(!genres.contains(track.getGenre()))
+			addGenre(track.getGenre());
 		
 		return musicLibrary.add(track);
 	}
@@ -57,10 +57,10 @@ public class Library
 	// TODO: Not very random
 	public Track getRandomTrack()
 	{
-		return musicLibrary.get(1);
+		return musicLibrary.get(0);
 	}
 
-	/*
+	/**
 	 * 
 	 */
 	public ArrayList<Track> randDump(int i) 
@@ -84,12 +84,74 @@ public class Library
 	{
 		for(int i = 0; i < musicLibrary.size(); i++)
 		{
-			if(musicLibrary.get(i).location.equals(input))
+			if(musicLibrary.get(i).getTitle().equals(input))
 			{
 				return musicLibrary.get(i);
 			}
 		}
 		return null;
+	}
+
+	public boolean hasArtist(String artist) 
+	{
+		for(int i = 0; i < artists.size(); i++)
+			if(artists.get(i).equals(artist))
+				return true;
+		return false;
+	}
+
+	public ArrayList<Track> getArtistTracks(String artist) 
+	{
+		ArrayList<Track> tracks = new ArrayList<Track>();
+		
+		for(int i = 0; i < musicLibrary.size(); i++)
+			if(musicLibrary.get(i).getArtist().equalsIgnoreCase(artist))
+				tracks.add(musicLibrary.get(i));
+		
+		// Auto shuffling when adding, probably will change it to only shuffle when specified
+		long seed = System.nanoTime();
+		Collections.shuffle(tracks, new Random(seed));
+			
+		return tracks;
+	}
+
+	public boolean hasAlbum(String album)
+	{
+		for(int i = 0; i < albums.size(); i++)
+			if(albums.get(i).equals(album))
+				return true;
+		return false;
+	}
+
+	public ArrayList<Track> getAlbumTracks(String album) 
+	{
+		ArrayList<Track> tracks = new ArrayList<Track>();
+		
+		for(int i = 0; i < musicLibrary.size(); i++)
+			if(musicLibrary.get(i).getAlbum().equals(album))
+				tracks.add(musicLibrary.get(i));
+		
+		// Auto shuffling when adding, probably will change it to only shuffle when specified
+		long seed = System.nanoTime();
+		Collections.shuffle(tracks, new Random(seed));
+		
+		return tracks;
+	}
+
+	public boolean hasTrack(String substring) 
+	{
+		// TODO Auto-generated method stub
+		return false;
+	}
+	
+	public String toString()
+	{
+		StringBuilder sb = new StringBuilder();
+		
+		for(int i = 0; i < musicLibrary.size(); i++)
+			sb.append(musicLibrary.get(i) + "\n");
+		
+		return sb.toString();
 	}
 	
 }

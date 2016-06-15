@@ -91,7 +91,6 @@ public class PlaybackThread implements Runnable
 
 				line = AudioSystem.getSourceDataLine(aufmt);
 				line.open();
-				System.out.print(">>> ");
 				line.start();
 
 				
@@ -118,7 +117,6 @@ public class PlaybackThread implements Runnable
 			}				
 		} catch (Exception e)
 		{
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
@@ -180,9 +178,10 @@ public class PlaybackThread implements Runnable
 		finished = true;
 	}
 
-	public void acknowledge() 
+	public String acknowledge() 
 	{
 		System.out.println("The current music thread is playing " + currentTrack);
+		return "The music thread is playing " + currentTrack;
 	}
 
 	public void skip() 

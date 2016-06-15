@@ -5,11 +5,11 @@ import com.djmachine.library.LibraryLoader;
 import com.djmachine.library.LibraryOrganizer;
 import com.djmachine.server.Server;
 
-public class ServerLauncher extends Thread
+public class ServerLauncher 
 {
 	public static void main(String[] args)
 	{
-		LibraryOrganizer.organizeLibrary();
+		//LibraryOrganizer.organizeLibrary();
 		Library library = LibraryLoader.LoadLibrary();
 		
 		int port = 8989;
