@@ -1,10 +1,7 @@
-package com.djmachine.server.widgets;
+package com.djmachine.client.widgets;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Toolkit;
-import java.awt.datatransfer.Clipboard;
-import java.awt.datatransfer.StringSelection;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseAdapter;
@@ -15,28 +12,27 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 
-import com.djmachine.server.Server;
+import com.djmachine.client.Client;
 
 @SuppressWarnings("serial")
-public class ChatPanel extends JPanel
-{	
+public class ConsoleWindow extends JPanel
+{
 	private JTextArea chatArea;
 	private boolean firstClick;
 	
-	public ChatPanel(Server server)
+	public ConsoleWindow(Client client, JTextArea consoleArea)
 	{
 		setLayout(new BorderLayout());
 		
-		chatArea = new JTextArea();
+		this.chatArea = consoleArea;
 		chatArea.setEditable(false);
 		chatArea.setLineWrap(true);
-		chatArea.append(server.TITLE + "@" + "localhost" + " (" + server.VERSION + ")\nType !help for help\n");
 		JScrollPane scroll = new JScrollPane(chatArea, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-		
+		chatArea.setText("DDJ Command Prompt\n(check logs for more information)\n");
 		
 		JTextField inputBox = new JTextField();
 		firstClick = true;
-		inputBox.setText("Type to send a message!");
+		inputBox.setText("DDJ Console");
 		inputBox.setForeground(Color.GRAY);
 		
 	
@@ -49,15 +45,8 @@ public class ChatPanel extends JPanel
 			{
 				if(e.getKeyCode() == KeyEvent.VK_ENTER && !inputBox.getText().equals(""))
 				{
-					if(inputBox.getText().charAt(0) == '!')
-						handleCommand(inputBox.getText());
-					else
-					{
-						chatArea.append(server.getServerName() + ": " + inputBox.getText() + "\n");
-						server.broadcast(inputBox.getText());
-					}
+					client.sendToServer("CONSOLE " + inputBox.getText());
 					inputBox.setText("");
-
 				}
 			}
 		});
@@ -79,21 +68,4 @@ public class ChatPanel extends JPanel
 		add(inputBox, BorderLayout.SOUTH);
 	}
 
-	private void handleCommand(String text) 
-	{
-		if(text.equals("!help"))
-			chatArea.append("Options are - \n"
-					+ "!clear - clear the message board\n"
-					+ "!save - copy the chatroom text to your clipboard \n"
-					+ "!help display the help message\n");
-		if(text.equals("!clear"))
-			chatArea.setText("Board Cleared!");
-		if(text.equals("!save"))
-		{
-			StringSelection selection = new StringSelection(chatArea.getText());
-			Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
-			clipboard.setContents(selection, selection);
-			chatArea.append("Saved to clipboard!");
-		}
-	}
 }

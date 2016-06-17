@@ -3,7 +3,6 @@ package com.djmachine.server;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
@@ -17,13 +16,15 @@ import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
+import javax.swing.JTextArea;
 
 import com.alee.laf.WebLookAndFeel;
 import com.djmachine.library.Library;
 import com.djmachine.muiscplayer.MusicPlayer;
 import com.djmachine.muiscplayer.MusicPlayer.Mode;
-import com.djmachine.server.threading.ActionHandler;
-import com.djmachine.server.widgets.ChatPanel;
+import com.djmachine.server.threading.ServerActionHandler;
+import com.djmachine.server.threading.ClientHandler;
+import com.djmachine.server.widgets.ServerChatPanel;
 import com.djmachine.server.widgets.DDJPrompt;
 import com.djmachine.server.widgets.MusicManager;
 import com.djmachine.server.widgets.UserManager;
@@ -31,6 +32,7 @@ import com.djmachine.server.widgets.UserManager;
 public class Server extends JFrame
 {
 	private static final long serialVersionUID = 1L;
+	private static final int SERVER_SIZE = 10;
 	public final String TITLE = "DDJServer";
 	public final String VERSION = "v0.1";
 	
@@ -38,23 +40,25 @@ public class Server extends JFrame
 	
 	private Library library;
 	private ServerSocket serverSock; 
-	private ArrayList<String> clientIDs;
-	private ArrayList<PrintWriter> clientOutputStreams;
+	private ArrayList<ClientHandler> clientThreads;
 	private MusicPlayer musicPlayer;
 	
 	// Mutable components;
 	private JLabel nowPlaying;
+	private JTextArea chatArea;
+	private JRadioButton acceptUsers;
+	private JRadioButton acceptInstructions;
 	
 	public Server(int port, Library library) 
 	{
-		super("DDJ Server Application");
+		super("DDJ Server");
 		this.setServerName("DJ the Nice Server");
 		
 		setupGUI();
 		
 		this.library = library;
-		clientIDs = new ArrayList<String>();
-		clientOutputStreams = new ArrayList<PrintWriter>();
+		
+		clientThreads = new ArrayList<ClientHandler>();
 		
 		musicPlayer = new MusicPlayer(library, Mode.SERVER, this);
 		Thread musicThread = new Thread(musicPlayer);
@@ -67,12 +71,15 @@ public class Server extends JFrame
 			
 			while(true)
 			{
-				Socket clientSocket = serverSock.accept();
-				clientOutputStreams.add(new PrintWriter(clientSocket.getOutputStream()));
-				
-				Thread t = new Thread(new ClientHandler(clientSocket, clientOutputStreams, this.library));
-				t.start();
-				System.out.println("[SERVER] Got a new connection");
+				//while(acceptingUsers)
+				{
+					Socket clientSocket = serverSock.accept();
+					ClientHandler handler = new ClientHandler(clientSocket, this, this.library, this.clientThreads);
+					Thread t = new Thread(handler);
+					clientThreads.add(handler);
+					t.start();
+					System.out.println("[SERVER] Got a new connection");
+				}
 			}
 
 		} catch (IOException e1)
@@ -87,25 +94,26 @@ public class Server extends JFrame
 	 * everybody a message saying what song is now playing. 
 	 * @param text the message sent to all users
 	 */
-	public void broadcast(String text)
+	public void broadcast(String message)
 	{
-		for(int i = 0; i < clientOutputStreams.size(); i++)
+		System.out.println("Sending to clients: " + message);
+		for(int i = 0; i < clientThreads.size(); i++)
 		{
-			clientOutputStreams.get(i).println(name + ": " + text + "\n");
+			clientThreads.get(i).tellClient(message);
 		}
 	}
 	
 	/**
-	 * A message sent to an individual user, usually an error message
+	 * A message sent to an individual user
 	 * @param userID - the ID of the user to send the message to
 	 * @param text - the message to send to a single user
 	 */
-	public void send(String userID, String text)
+	public void tellUser(String user, String message) 
 	{
-		for(int i = 0; i < clientIDs.size(); i++)
+		for(int i = 0; i < clientThreads.size(); i++)
 		{
-			if(clientIDs.get(i).equals(userID))
-				clientOutputStreams.get(i).println(name + ": " + text + "(private message)\n");
+			if(clientThreads.get(i).getName().equals(user))
+				clientThreads.get(i).tellClient(message);
 		}
 	}
 	
@@ -115,7 +123,8 @@ public class Server extends JFrame
 	}
 	
 	/**
-	 * 
+	 * TODO: This needs to be done in a better way... 
+	 * @param requestee - the user making the request to the music player
 	 * @param request - the request sent from clients or widgets 
 	 */
 	public String processRequest(String requestee, String request)
@@ -127,9 +136,9 @@ public class Server extends JFrame
 	 * If the music player gets angry it'll add an action to the server which will then be handled.
 	 * @param action
 	 */
-	public void addAction(String action)
+	public void addAction(String username, String action)
 	{
-		new Thread(new ActionHandler(this, action)).start();;
+		new Thread(new ServerActionHandler(this, username, action)).start();;
 	}
 	
 	/**
@@ -152,7 +161,7 @@ public class Server extends JFrame
 
         JPanel instructionPanel = new JPanel();
         instructionPanel.setLayout(new BoxLayout(instructionPanel, BoxLayout.Y_AXIS));
-        JRadioButton acceptInstructions = new JRadioButton("<html>Accept User  <br>Instructions<html>");
+        acceptInstructions = new JRadioButton("<html>Accept User  <br>Instructions<html>");
         acceptInstructions.setSelected(true);
         JRadioButton declineInstructions = new JRadioButton("<html>Decline User  <br>Instructions</html>");
         ButtonGroup instructionGroup = new ButtonGroup();
@@ -163,7 +172,7 @@ public class Server extends JFrame
         
         JPanel newUserPanel = new JPanel();
         newUserPanel.setLayout(new BoxLayout(newUserPanel, BoxLayout.Y_AXIS));
-        JRadioButton acceptUsers = new JRadioButton("<html>Accept New  <br>Users</html>");
+        acceptUsers = new JRadioButton("<html>Accept New  <br>Users</html>");
         acceptUsers.setSelected(true);
         JRadioButton declineUsers = new JRadioButton("<html>Decline New  <br>User</html>");
         ButtonGroup userGroup = new ButtonGroup();
@@ -182,9 +191,9 @@ public class Server extends JFrame
         right.setResizeWeight(0.5);
         right.setEnabled(false);
 
-        
+        chatArea = new JTextArea();
     	JTabbedPane center = new JTabbedPane();
-        center.addTab("Chat Room", new ChatPanel(this));
+        center.addTab("Chat Room", new ServerChatPanel(this, chatArea));
         center.addTab("User Manager", new UserManager());
         center.addTab("DDJPrompt", new DDJPrompt(this));
         center.addTab("Music Manager", new MusicManager());
@@ -212,6 +221,30 @@ public class Server extends JFrame
 	public String getServerName() 
 	{
 		return name;
+	}
+
+	public boolean verify(String user) 
+	{
+		if(user.equals("malware.exe"))
+			return false;
+		if(clientThreads.size() > SERVER_SIZE)
+			return false;
+		return true;
+	}
+
+	public void closeConnectionWith(String user) 
+	{
+		System.out.println("[WARNING] Ending session with " + user);
+		for(int i = 0; i < clientThreads.size(); i++)
+		{
+			if(clientThreads.get(i).getName().equals(user))
+				clientThreads.get(i).closeConnection();
+		}
+	}
+
+	public JTextArea getChatArea()
+	{
+		return chatArea;
 	}
 }
 

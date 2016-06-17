@@ -220,6 +220,6 @@ public class MusicPlayer implements Runnable
 	
 	private void sendAction(String message)
 	{
-		server.addAction(message);
+		server.addAction("root", message);
 	}
 }
