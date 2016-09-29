@@ -1,5 +1,6 @@
 # Digital-Disc-Jockey
 ### Listen to music anywhere you can plug in.
+###Deprecated, see [Utilityman/SoundMachine] (https://github.com/Utilityman/SoundMachine) instead
 
 Idea: If you can provide power to a device with DDJ and that device also has audio output, 
 you will be able to run DDJ in some way or another. 
